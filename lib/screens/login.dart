@@ -1,15 +1,16 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
-
-import 'home.dart';
-import 'home2.dart';
-import 'signin.dart';
+// login.dart
 import 'package:flutter/material.dart';
 
+import 'home2.dart';
+import 'signin.dart';
+import 'usuario.dart';
+
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  final List<Usuario> usuarios;
+
+  const LoginPage({Key? key, required this.usuarios}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _LoginPageState createState() => _LoginPageState();
 }
 
@@ -17,12 +18,13 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _errorMessage = '';
+  bool _loginExitoso = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Proyecto final Web',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -30,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
             color: Colors.green,
           ),
         ),
-        centerTitle: true, // Esta propiedad centrará el título en la AppBar
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -65,7 +67,6 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: () {
                 _login();
-                // Navegar a la nueva pantalla solo si el login es exitoso
                 if (_loginExitoso) {
                   Navigator.push(
                     context,
@@ -79,7 +80,9 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SigninPage()),
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          SigninPage(usuarios: widget.usuarios)),
                 );
               },
               child: Text('Crear cuenta'),
@@ -90,25 +93,26 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  bool _loginExitoso = false;
-
   void _login() {
-    // Verificar si el nombre de usuario y la contraseña coinciden
     String username = _usernameController.text;
     String password = _passwordController.text;
 
-    // Ejemplo de credenciales (puedes cambiar esto según tus necesidades)
-    String correctUsername = 'uno';
-    String correctPassword = 'dos';
+    // Verificar si el nombre de usuario y la contraseña coinciden con algún usuario registrado
+    bool encontrado = false;
+    for (var usuario in widget.usuarios) {
+      if (usuario.nombre == username && usuario.contrasena == password) {
+        encontrado = true;
+        break;
+      }
+    }
 
-    if (username == correctUsername && password == correctPassword) {
-      // Login exitoso, actualizamos la variable y mostramos un mensaje en la consola.
+    if (encontrado) {
       setState(() {
         _loginExitoso = true;
-        print('Login exitoso');
+        _errorMessage = '';
       });
+      print('Login exitoso');
     } else {
-      // Login fallido, actualizamos la variable y mostramos un mensaje de error.
       setState(() {
         _loginExitoso = false;
         _errorMessage = 'Usuario o contraseña incorrectos. Inténtalo de nuevo.';

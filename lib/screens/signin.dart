@@ -1,16 +1,18 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
-
+// signin.dart
 import 'package:flutter/material.dart';
 
+import 'usuario.dart';
+
 class SigninPage extends StatefulWidget {
-  const SigninPage({Key? key}) : super(key: key);
+  final List<Usuario> usuarios;
+
+  SigninPage({Key? key, required this.usuarios}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
-  _LoginPageState createState() => _LoginPageState();
+  _SigninPageState createState() => _SigninPageState();
 }
 
-class _LoginPageState extends State<SigninPage> {
+class _SigninPageState extends State<SigninPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -28,7 +30,7 @@ class _LoginPageState extends State<SigninPage> {
             color: Colors.blue,
           ),
         ),
-        centerTitle: true, // Esta propiedad centrará el título en la AppBar
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -70,7 +72,31 @@ class _LoginPageState extends State<SigninPage> {
   }
 
   void _signin() {
-    // Verificar si el nombre de usuario y la contraseña coinciden
-    print("Boton presionado");
+    String username = _usernameController.text;
+    String password = _passwordController.text;
+    String telefono = _phoneController.text;
+    String fechaNacimiento = _ageController.text;
+
+    if (username.isNotEmpty && password.isNotEmpty && telefono.isNotEmpty && fechaNacimiento.isNotEmpty) {
+      Usuario nuevoUsuario = Usuario(username, password, telefono, fechaNacimiento);
+      setState(() {
+        widget.usuarios.add(nuevoUsuario);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Usuario registrado: $username'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Todos los campos son obligatorios'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 }

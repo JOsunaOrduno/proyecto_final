@@ -1,7 +1,8 @@
 // ignore_for_file: file_names, unused_import, prefer_const_constructors
 
-import '../screens/product_screen.dart';
 import 'package:flutter/material.dart';
+
+import '../screens/product_screen.dart';
 
 class CategoryItem extends StatelessWidget {
   final String name;

@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:proyecto_final/screens/home.dart';
+import 'package:provider/provider.dart';
 
 class ProductScreen extends StatefulWidget {
   final String categoryName;
@@ -55,33 +56,41 @@ class _ProductScreen extends State<ProductScreen> {
             },
           ),
           SearchAnchor(
-              searchController: controller,
-              builder: (BuildContext context, SearchController controller) {
-                return IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    controller.openView();
+            searchController: controller,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder:
+                (BuildContext context, SearchController controller) {
+              final query = controller.text;
+              final filteredProducts = widget.products.where((product) {
+                return product.name.toLowerCase().contains(query.toLowerCase());
+              }).toList();
+
+              return List<ListTile>.generate(filteredProducts.length,
+                  (int index) {
+                final String item = filteredProducts[index].name;
+                return ListTile(
+                  title: Text(item),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailScreen(
+                          product: filteredProducts[index],
+                        ),
+                      ),
+                    );
                   },
                 );
-              },
-              suggestionsBuilder:
-                  (BuildContext context, SearchController controller) {
-                return List<ListTile>.generate(widget.products.length,
-                    (int index) {
-                  final String item = widget.products[index].name;
-                  return ListTile(
-                    title: Text(item),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProductDetailScreen(
-                                product: widget.products[index])),
-                      );
-                    },
-                  );
-                });
-              }),
+              });
+            },
+          ),
         ],
       ),
       body: ListView.builder(
@@ -130,8 +139,31 @@ class ProductItem extends StatelessWidget {
   }
 }
 
-// ...
+class ShoppingCart extends ChangeNotifier {
+  static final ShoppingCart _instance = ShoppingCart._internal();
 
+  factory ShoppingCart() {
+    return _instance;
+  }
+
+  ShoppingCart._internal();
+
+  final List<Product> _items = [];
+
+  List<Product> get items => List.unmodifiable(_items);
+
+  void addToCart(Product product) {
+    _items.add(product);
+    notifyListeners();
+  }
+
+  void clear() {
+    _items.clear();
+    notifyListeners();
+  }
+}
+
+// ...
 class ProductDetailScreen extends StatelessWidget {
   final Product product;
 
@@ -173,7 +205,8 @@ class ProductDetailScreen extends StatelessWidget {
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                //Provider.of<ShoppingCart>(context, listen: false).addToCart(product);
+                Provider.of<ShoppingCart>(context, listen: false)
+                    .addToCart(product);
               },
               child: Text('Agregar al carrito'),
             ),
@@ -185,30 +218,6 @@ class ProductDetailScreen extends StatelessWidget {
 }
 
 // ...
-
-class ShoppingCart extends ChangeNotifier {
-  static final ShoppingCart _instance = ShoppingCart._internal();
-
-  factory ShoppingCart() {
-    return _instance;
-  }
-
-  ShoppingCart._internal();
-
-  final List<Product> _items = [];
-
-  List<Product> get items => List.unmodifiable(_items);
-
-  void addToCart(Product product) {
-    _items.add(product);
-    notifyListeners();
-  }
-
-  void clear() {
-    _items.clear();
-    notifyListeners();
-  }
-}
 
 void addToCart(BuildContext context, Product product) {
   if (kDebugMode) {
